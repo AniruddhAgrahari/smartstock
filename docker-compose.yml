@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: smartstock-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://smartstock:smartstock@db/smartstock
+      - SECRET_KEY=your_secret_key_here_change_in_production
+      - ENVIRONMENT=development
+      - DEBUG=1
+    volumes:
+      - ./app:/app/app
+    depends_on:
+      - db
+    networks:
+      - smartstock-network
+
+  db:
+    image: postgres:15
+    container_name: smartstock-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=smartstock
+      - POSTGRES_PASSWORD=smartstock
+      - POSTGRES_DB=smartstock
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartstock-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: smartstock-pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@smartstock.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - smartstock-network
+
+networks:
+  smartstock-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:
